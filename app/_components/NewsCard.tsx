@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Bookmark, Clock } from "lucide-react";
 import Image from "next/image";
-import React from "react";
-import { newsType } from "../_types/newsType";
 import { useRouter } from "next/navigation";
+import { newsType } from "../_types/newsType";
 import { useSaveItemsStore } from "../stores/saveListStore";
-import { Tillana } from "next/font/google";
+import useLocalStorage from "../_hooks/useLocalStorage";
+import { useEffect } from "react";
 
 function NewsCard({
   source,
@@ -23,9 +23,16 @@ function NewsCard({
   publishedAt,
 }: newsType) {
   const router = useRouter();
+
   const { saveItems, setItems, removeItems } = useSaveItemsStore();
 
   const isAlreadySaved = saveItems.some((news) => news.title === title);
+
+  const [storedItem, setStoredItem] = useLocalStorage("saved-items");
+
+  useEffect(() => {
+    setStoredItem(saveItems);
+  }, [saveItems, setStoredItem]);
 
   const toogleSave = () => {
     const news = {
@@ -36,7 +43,12 @@ function NewsCard({
       publishedAt,
     };
 
-    !isAlreadySaved ? setItems(news) : removeItems(title);
+    if (isAlreadySaved) {
+      removeItems(title);
+    } else {
+      setItems(news);
+      setStoredItem([...storedItem, news]);
+    }
   };
   return (
     <Card className="border border-primary relative">

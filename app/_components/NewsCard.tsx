@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +12,8 @@ import Image from "next/image";
 import React from "react";
 import { newsType } from "../_types/newsType";
 import { useRouter } from "next/navigation";
+import { useSaveItemsStore } from "../stores/saveListStore";
+import { Tillana } from "next/font/google";
 
 function NewsCard({
   source,
@@ -21,10 +23,26 @@ function NewsCard({
   publishedAt,
 }: newsType) {
   const router = useRouter();
+  const { saveItems, setItems, removeItems } = useSaveItemsStore();
+
+  const isAlreadySaved = saveItems.some((news) => news.title === title);
+
+  const toogleSave = () => {
+    const news = {
+      source,
+      title,
+      author,
+      urlToImage,
+      publishedAt,
+    };
+
+    !isAlreadySaved ? setItems(news) : removeItems(title);
+  };
   return (
     <Card className="border border-primary relative">
       <Button
-        variant="outline"
+        onClick={toogleSave}
+        variant={isAlreadySaved ? "default" : "outline"}
         size="icon"
         className="absolute rounded-full border-primary top-2 right-5"
       >
@@ -55,7 +73,9 @@ function NewsCard({
       </CardContent>
       <CardFooter className="flex justify-between items-center">
         <div className="text-normal">🔗Source - ${source.name}</div>
-        <Button onClick={()=>router.push(`/news/${title}`)}>See More...</Button>
+        <Button onClick={() => router.push(`/news/${title}`)}>
+          See More...
+        </Button>
       </CardFooter>
     </Card>
   );

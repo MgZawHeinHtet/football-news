@@ -1,24 +1,17 @@
 "use client";
-import React, { useEffect } from "react";
-import NewsCard from "./NewsCard";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { getNews } from "../_services/apiNews";
 import { newsType } from "../_types/newsType";
-import NewsCardSkeletons from "./NewsCardSkeletons";
-import { useInView } from "react-intersection-observer";
 import LoadingSpinner from "./LoadingSpinner";
+import NewsCard from "./NewsCard";
+import NewsCardSkeletons from "./NewsCardSkeletons";
+import useNewsInfiniteScroll from "../_hooks/useNewsInfiniteScroll";
 
 function NewsList() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["news"],
-      queryFn: getNews,
-      initialPageParam: 1,
-      getNextPageParam: (lastPage, allPages) => {
-        const nextPage = lastPage.length ? allPages.length + 1 : undefined;
-        return nextPage;
-      },
-    });
+    useNewsInfiniteScroll();
 
   const { ref, inView, entry } = useInView({
     /* Optional options */
@@ -36,12 +29,11 @@ function NewsList() {
 
   if (isLoading) return <NewsCardSkeletons />;
 
-  console.log("I an ", data);
   return (
     <>
       <main className="max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-8 mx-auto p-4">
         {data?.pages?.map((news: any) =>
-          news.map((article: newsType, index: number) => (
+          news?.map((article: newsType, index: number) => (
             <NewsCard
               urlToImage={article.urlToImage}
               source={article.source}

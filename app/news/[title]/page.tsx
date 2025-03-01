@@ -2,7 +2,7 @@ import Image from "next/image";
 import React from "react";
 
 async function page({ params }: any) {
-  const { title } = params;
+  const { title } = await params;
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}?q=${title}&searchIn=title&apiKey=${process.env.NEXT_PUBLIC_API_KEY}`
